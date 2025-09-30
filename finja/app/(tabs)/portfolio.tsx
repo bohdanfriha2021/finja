@@ -1,6 +1,6 @@
 // app/(tabs)/portfolio.tsx
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
 import { useAppDataContext } from '@/context/AppDataContext';
@@ -12,6 +12,32 @@ import { Currency } from '@/types';
 export default function PortfolioScreen() {
   const { savings, exchangeRates } = useAppDataContext();
   const { totalUAH } = calculateTotals(savings, exchangeRates);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const portfolioData = React.useMemo(() => {
     if (totalUAH === 0) return [];
@@ -42,14 +68,34 @@ export default function PortfolioScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Finja 💰</Text>
-          <Text style={styles.headerSubtitle}>Портфель</Text>
+          <View style={styles.gradientOverlay} />
+          
+          <View style={styles.headerContent}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.headerIcon}>📊</Text>
+            </View>
+            <Text style={styles.headerTitle}>Портфель</Text>
+            <Text style={styles.headerSubtitle}>Аналіз розподілу активів</Text>
+          </View>
+
+          <View style={styles.decorativeCircle1} />
+          <View style={styles.decorativeCircle2} />
         </View>
 
         <View style={styles.emptyState}>
-          <MaterialIcons name="pie-chart" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Немає даних для діаграми портфеля</Text>
-          <Text style={styles.emptySubtext}>Додайте валюту, щоб побачити розподіл</Text>
+          <View style={styles.emptyIconContainer}>
+            <MaterialIcons name="pie-chart" size={80} color="#cbd5e0" />
+          </View>
+          <Text style={styles.emptyText}>Немає даних для аналізу</Text>
+          <Text style={styles.emptySubtext}>
+            Додайте валюту, щоб побачити{'\n'}розподіл вашого портфеля
+          </Text>
+          <View style={styles.emptyHint}>
+            <MaterialIcons name="lightbulb-outline" size={20} color="#f59e0b" />
+            <Text style={styles.emptyHintText}>
+              Почніть з головної сторінки
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -57,65 +103,132 @@ export default function PortfolioScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Finja 💰</Text>
-        <Text style={styles.headerSubtitle}>Портфель</Text>
+        <View style={styles.gradientOverlay} />
+        
+        <Animated.View 
+          style={[
+            styles.headerContent,
+            { transform: [{ scale: scaleAnim }] }
+          ]}
+        >
+          <View style={styles.iconContainer}>
+            <Text style={styles.headerIcon}>📊</Text>
+          </View>
+          <Text style={styles.headerTitle}>Портфель</Text>
+          <Text style={styles.headerSubtitle}>Аналіз розподілу активів</Text>
+        </Animated.View>
+
+        <View style={styles.decorativeCircle1} />
+        <View style={styles.decorativeCircle2} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Розподіл портфеля</Text>
-          <Text style={styles.subtitle}>
-            Загальна сума: {formatCurrency(totalUAH)} грн
-          </Text>
-
-          {portfolioData.length > 0 && (
-            <PieChart
-              data={portfolioData}
-              width={Dimensions.get('window').width - 80}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#ffffff',
-                backgroundGradientFrom: '#ffffff',
-                backgroundGradientTo: '#ffffff',
-                decimalPlaces: 1,
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
-          )}
-
-          <View style={styles.details}>
-            {(Object.keys(savings) as Currency[]).map((currency) => {
-              const amount = savings[currency];
-              if (amount > 0) {
-                const rate = exchangeRates[currency];
-                const amountUAH = amount * rate;
-                const percentage = (amountUAH / totalUAH) * 100;
-                const emoji = CURRENCY_EMOJIS[currency];
-
-                return (
-                  <View key={currency} style={styles.detailItem}>
-                    <View
-                      style={[
-                        styles.colorIndicator,
-                        { backgroundColor: CURRENCY_COLORS[currency] },
-                      ]}
-                    />
-                    <Text style={styles.detailText}>
-                      {emoji} {currency}: {formatCurrency(amount)} ({percentage.toFixed(1)}%)
-                    </Text>
-                  </View>
-                );
-              }
-              return null;
-            })}
+      <Animated.View
+        style={[
+          styles.content,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Total Amount Card */}
+          <View style={styles.totalCard}>
+            <Text style={styles.totalLabel}>Загальна вартість</Text>
+            <Text style={styles.totalAmount}>{formatCurrency(totalUAH)}</Text>
+            <Text style={styles.totalCurrency}>🇺🇦 гривень</Text>
           </View>
-        </View>
-      </ScrollView>
+
+          {/* Chart Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Розподіл портфеля</Text>
+              <View style={styles.cardDivider} />
+            </View>
+
+            {portfolioData.length > 0 && (
+              <View style={styles.chartContainer}>
+                <PieChart
+                  data={portfolioData}
+                  width={Dimensions.get('window').width - 80}
+                  height={220}
+                  chartConfig={{
+                    backgroundColor: '#ffffff',
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#ffffff',
+                    decimalPlaces: 1,
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  }}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="15"
+                  absolute
+                />
+              </View>
+            )}
+          </View>
+
+          {/* Details Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Деталізація</Text>
+              <View style={styles.cardDivider} />
+            </View>
+
+            <View style={styles.details}>
+              {(Object.keys(savings) as Currency[]).map((currency, index) => {
+                const amount = savings[currency];
+                if (amount > 0) {
+                  const rate = exchangeRates[currency];
+                  const amountUAH = amount * rate;
+                  const percentage = (amountUAH / totalUAH) * 100;
+                  const emoji = CURRENCY_EMOJIS[currency];
+
+                  return (
+                    <View key={currency} style={styles.detailItem}>
+                      <View style={styles.detailLeft}>
+                        <View
+                          style={[
+                            styles.colorIndicator,
+                            { backgroundColor: CURRENCY_COLORS[currency] },
+                          ]}
+                        />
+                        <View style={styles.detailInfo}>
+                          <Text style={styles.detailCurrency}>
+                            {emoji} {currency}
+                          </Text>
+                          <Text style={styles.detailAmount}>
+                            {formatCurrency(amount)}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.detailRight}>
+                        <Text style={styles.detailPercentage}>
+                          {percentage.toFixed(1)}%
+                        </Text>
+                        <Text style={styles.detailValue}>
+                          {formatCurrency(amountUAH)} ₴
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                }
+                return null;
+              })}
+            </View>
+          </View>
+
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <MaterialIcons name="info-outline" size={20} color="#667eea" />
+            <Text style={styles.infoText}>
+              Діаграма показує розподіл вашого портфеля за валютами в гривневому еквіваленті
+            </Text>
+          </View>
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }
@@ -123,75 +236,217 @@ export default function PortfolioScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f7fa',
   },
   header: {
-    backgroundColor: '#4169E1',
+    backgroundColor: '#667eea',
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 40,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: 'hidden',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#764ba2',
+    opacity: 0.3,
+  },
+  headerContent: {
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  iconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  headerIcon: {
+    fontSize: 36,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: '#fff',
-    textAlign: 'center',
+    letterSpacing: 1,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#fff',
-    textAlign: 'center',
-    marginTop: 4,
-    opacity: 0.9,
+    marginTop: 6,
+    opacity: 0.95,
+    fontWeight: '500',
+  },
+  decorativeCircle1: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    top: -20,
+    right: -30,
+  },
+  decorativeCircle2: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    bottom: 20,
+    left: -20,
+  },
+  content: {
+    flex: 1,
+    marginTop: -20,
   },
   scrollContent: {
     padding: 20,
+    paddingTop: 0,
     paddingBottom: 40,
+  },
+  totalCard: {
+    backgroundColor: '#667eea',
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  totalLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  totalAmount: {
+    fontSize: 40,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  totalCurrency: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#fff',
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 16,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
-    alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
+  cardHeader: {
     marginBottom: 20,
-    color: '#666',
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#2d3748',
+    marginBottom: 8,
+  },
+  cardDivider: {
+    height: 3,
+    width: 40,
+    backgroundColor: '#667eea',
+    borderRadius: 2,
+  },
+  chartContainer: {
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   details: {
-    marginTop: 20,
-    width: '100%',
+    gap: 12,
   },
   detailItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#f7fafc',
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: 'transparent',
+  },
+  detailLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   colorIndicator: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 40,
+    borderRadius: 6,
     marginRight: 12,
   },
-  detailText: {
+  detailInfo: {
+    flex: 1,
+  },
+  detailCurrency: {
     fontSize: 16,
-    color: '#333',
+    fontWeight: '700',
+    color: '#2d3748',
+    marginBottom: 2,
+  },
+  detailAmount: {
+    fontSize: 14,
+    color: '#718096',
+    fontWeight: '600',
+  },
+  detailRight: {
+    alignItems: 'flex-end',
+  },
+  detailPercentage: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#667eea',
+    marginBottom: 2,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: '#a0aec0',
+    fontWeight: '600',
+  },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#edf2f7',
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#667eea',
+    marginTop: 4,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#4a5568',
+    marginLeft: 12,
+    lineHeight: 18,
   },
   emptyState: {
     flex: 1,
@@ -199,16 +454,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 40,
   },
+  emptyIconContainer: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#f7fafc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#2d3748',
     textAlign: 'center',
-    marginTop: 16,
+    marginBottom: 12,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 15,
+    color: '#718096',
     textAlign: 'center',
-    marginTop: 8,
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  emptyHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef3c7',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  emptyHintText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400e',
+    marginLeft: 8,
   },
 });
