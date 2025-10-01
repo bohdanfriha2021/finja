@@ -32,17 +32,17 @@ export const DEFAULT_SAVINGS = {
 };
 
 export const DEFAULT_EXCHANGE_RATES = {
-  UAH: 1,
-  USD: 37,
-  EUR: 40,
-  USDT: 37,
+  UAH: 0,
+  USD: 0,
+  EUR: 0,
+  USDT: 0,
 };
 
 export const DEFAULT_ASSET_PRICES = {
-  BTC: 50000,
-  ETH: 3000,
-  XAU: 2000,
-  XAG: 25,
+  BTC: 0,
+  ETH: 0,
+  XAU: 0,
+  XAG: 0,
 };
 
 export const STORAGE_KEYS = {

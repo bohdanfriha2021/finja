@@ -13,7 +13,7 @@ export const api = {
       });
 
       if (!response.ok) {
-        throw new Error('Monobank API failed');
+        throw new Error(`Monobank API failed. Code error:  ${response.status}`);
       }
 
       const data = await response.json();

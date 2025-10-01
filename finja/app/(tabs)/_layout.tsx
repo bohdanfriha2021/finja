@@ -13,9 +13,9 @@ export default function TabsLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#ddd',
-          paddingBottom: 8,
+          paddingBottom: 40,
           paddingTop: 8,
-          height: 70,
+          height: 75,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,
@@ -32,6 +32,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Головна',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="home" size={size} color={color} />
           ),
@@ -41,6 +42,7 @@ export default function TabsLayout() {
         name="total"
         options={{
           title: 'Загалом',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="account-balance-wallet" size={size} color={color} />
           ),
@@ -50,6 +52,7 @@ export default function TabsLayout() {
         name="portfolio"
         options={{
           title: 'Портфель',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="pie-chart" size={size} color={color} />
           ),
@@ -59,6 +62,7 @@ export default function TabsLayout() {
         name="assets"
         options={{
           title: 'Активи',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="coins" size={size - 4} color={color} />
           ),
@@ -68,6 +72,7 @@ export default function TabsLayout() {
         name="chart"
         options={{
           title: 'Графік',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="show-chart" size={size} color={color} />
           ),
@@ -77,6 +82,7 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: 'Налаштування',
+          tabBarShowLabel: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="settings" size={size} color={color} />
           ),

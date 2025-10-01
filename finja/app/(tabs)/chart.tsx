@@ -18,6 +18,13 @@ export default function ChartScreen() {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
+  const reducedLabels =
+    chartDays === 14
+      ? chartData.labels.map((label: string, i: number) => (i % 2 === 0 ? label : ""))
+      : chartDays === 21 ? chartData.labels.map((label: string, i: number) => (i % 3 === 0 ? label : "")) 
+      : chartDays > 21 ? chartData.labels.map((label: string, i: number) => (i % 5 === 0 ? label : ""))
+      : chartData.labels;
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -232,30 +239,33 @@ export default function ChartScreen() {
             ) : chartData ? (
               <>
                 <View style={styles.chartContainer}>
-                  <LineChart
-                    data={chartData}
-                    width={Dimensions.get('window').width - 80}
-                    height={220}
-                    chartConfig={{
-                      backgroundColor: '#ffffff',
-                      backgroundGradientFrom: '#ffffff',
-                      backgroundGradientTo: '#ffffff',
-                      decimalPlaces: 2,
-                      color: (opacity = 1) => `rgba(102, 126, 234, ${opacity})`,
-                      labelColor: (opacity = 1) => `rgba(74, 85, 104, ${opacity})`,
-                      style: {
-                        borderRadius: 16,
-                      },
-                      propsForDots: {
-                        r: '5',
-                        strokeWidth: '2',
-                        stroke: '#667eea',
-                        fill: '#fff',
-                      },
-                    }}
-                    bezier
-                    style={styles.chart}
-                  />
+                      <LineChart
+                        data={{
+                          ...chartData,
+                          labels: reducedLabels
+                        }}
+                        width={Dimensions.get('window').width - 80}
+                        height={220}
+                        chartConfig={{
+                          backgroundColor: '#ffffff',
+                          backgroundGradientFrom: '#ffffff',
+                          backgroundGradientTo: '#ffffff',
+                          decimalPlaces: 2,
+                          color: (opacity = 1) => `rgba(102, 126, 234, ${opacity})`,
+                          labelColor: (opacity = 1) => `rgba(74, 85, 104, ${opacity})`,
+                          style: {
+                            borderRadius: 16,
+                          },
+                          propsForDots: {
+                            r: '5',
+                            strokeWidth: '2',
+                            stroke: '#667eea',
+                            fill: '#fff',
+                          },
+                        }}
+                        bezier
+                        style={styles.chart}
+                      />
                 </View>
 
                 <View style={styles.chartFooter}>

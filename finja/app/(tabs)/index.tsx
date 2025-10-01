@@ -5,6 +5,7 @@ import { QuickInput } from '@/components/QuickInput';
 import { CurrencyInput } from '@/components/CurrencyInput';
 import { StatsGrid } from '@/components/StatsGrid';
 import { RatesList } from '@/components/RatesList';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -74,10 +75,6 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.section}>
-            <QuickInput />
-          </View>
-
           <View style={styles.section}>
             <CurrencyInput />
           </View>
