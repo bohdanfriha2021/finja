@@ -38,6 +38,8 @@ export default function AssetsScreen() {
     ]).start();
   }, []);
 
+  const isValidPrice = (price: number) => price > 0 && isFinite(price);
+
   if (totalUSD === 0) {
     return (
       <View style={styles.container}>
@@ -145,11 +147,19 @@ export default function AssetsScreen() {
               </View>
               <View style={styles.assetInfo}>
                 <Text style={styles.assetName}>Bitcoin</Text>
-                <Text style={styles.assetAmount}>{equivalents.BTC.toFixed(6)} BTC</Text>
+                <Text style={styles.assetAmount}>
+                  {isValidPrice(assetPrices.BTC) 
+                    ? `${equivalents.BTC.toFixed(6)} BTC`
+                    : 'Недоступно'}
+                </Text>
               </View>
               <View style={styles.assetPriceContainer}>
                 <Text style={styles.assetPriceLabel}>Ціна</Text>
-                <Text style={styles.assetPrice}>${assetPrices.BTC.toLocaleString()}</Text>
+                <Text style={styles.assetPrice}>
+                  {isValidPrice(assetPrices.BTC)
+                    ? `$${assetPrices.BTC.toLocaleString()}`
+                    : '—'}
+                </Text>
               </View>
             </View>
 
@@ -159,11 +169,19 @@ export default function AssetsScreen() {
               </View>
               <View style={styles.assetInfo}>
                 <Text style={styles.assetName}>Ethereum</Text>
-                <Text style={styles.assetAmount}>{equivalents.ETH.toFixed(4)} ETH</Text>
+                <Text style={styles.assetAmount}>
+                  {isValidPrice(assetPrices.ETH)
+                    ? `${equivalents.ETH.toFixed(4)} ETH`
+                    : 'Недоступно'}
+                </Text>
               </View>
               <View style={styles.assetPriceContainer}>
                 <Text style={styles.assetPriceLabel}>Ціна</Text>
-                <Text style={styles.assetPrice}>${assetPrices.ETH.toLocaleString()}</Text>
+                <Text style={styles.assetPrice}>
+                  {isValidPrice(assetPrices.ETH)
+                    ? `$${assetPrices.ETH.toLocaleString()}`
+                    : '—'}
+                </Text>
               </View>
             </View>
           </View>
@@ -181,11 +199,19 @@ export default function AssetsScreen() {
               </View>
               <View style={styles.assetInfo}>
                 <Text style={styles.assetName}>Золото</Text>
-                <Text style={styles.assetAmount}>{equivalents.XAU.toFixed(3)} унцій</Text>
+                <Text style={styles.assetAmount}>
+                  {isValidPrice(assetPrices.XAU)
+                    ? `${equivalents.XAU.toFixed(3)} унцій`
+                    : 'Недоступно'}
+                </Text>
               </View>
               <View style={styles.assetPriceContainer}>
                 <Text style={styles.assetPriceLabel}>За унцію</Text>
-                <Text style={styles.assetPrice}>${assetPrices.XAU.toLocaleString()}</Text>
+                <Text style={styles.assetPrice}>
+                  {isValidPrice(assetPrices.XAU)
+                    ? `$${assetPrices.XAU.toLocaleString()}`
+                    : '—'}
+                </Text>
               </View>
             </View>
 
@@ -195,11 +221,19 @@ export default function AssetsScreen() {
               </View>
               <View style={styles.assetInfo}>
                 <Text style={styles.assetName}>Срібло</Text>
-                <Text style={styles.assetAmount}>{equivalents.XAG.toFixed(1)} унцій</Text>
+                <Text style={styles.assetAmount}>
+                  {isValidPrice(assetPrices.XAG)
+                    ? `${equivalents.XAG.toFixed(1)} унцій`
+                    : 'Недоступно'}
+                </Text>
               </View>
               <View style={styles.assetPriceContainer}>
                 <Text style={styles.assetPriceLabel}>За унцію</Text>
-                <Text style={styles.assetPrice}>${assetPrices.XAG.toLocaleString()}</Text>
+                <Text style={styles.assetPrice}>
+                  {isValidPrice(assetPrices.XAG)
+                    ? `$${assetPrices.XAG.toLocaleString()}`
+                    : '—'}
+                </Text>
               </View>
             </View>
           </View>

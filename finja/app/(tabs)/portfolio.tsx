@@ -52,17 +52,20 @@ export default function PortfolioScreen() {
         const percentage = (amountUAH / totalUAH) * 100;
 
         data.push({
-          name: `${currency}\n${formatCurrency(amount)}`,
-          population: percentage,
+          name: `${currency} ${Math.round(percentage)}%`,
+          population: amountUAH,
           color: CURRENCY_COLORS[currency],
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
+          legendFontColor: '#2d3748',
+          legendFontSize: 14,
         });
       }
     });
 
     return data;
   }, [savings, exchangeRates, totalUAH]);
+
+  const screenWidth = Dimensions.get('window').width;
+  const chartPadding = screenWidth * 0.25;
 
   if (totalUAH === 0) {
     return (
@@ -152,20 +155,47 @@ export default function PortfolioScreen() {
               <View style={styles.chartContainer}>
                 <PieChart
                   data={portfolioData}
-                  width={Dimensions.get('window').width - 80}
-                  height={220}
+                  width={screenWidth}
+                  height={275}
                   chartConfig={{
                     backgroundColor: '#ffffff',
                     backgroundGradientFrom: '#ffffff',
                     backgroundGradientTo: '#ffffff',
-                    decimalPlaces: 1,
+                    decimalPlaces: 0,
                     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                   }}
                   accessor="population"
                   backgroundColor="transparent"
-                  paddingLeft="15"
-                  absolute
+                  paddingLeft={chartPadding.toString()}
+                  hasLegend={false}
+                  absolute={false}
                 />
+                
+                <View style={styles.customLegend}>
+                  {(Object.keys(savings) as Currency[]).map((currency) => {
+                    const amount = savings[currency];
+                    if (amount > 0) {
+                      const rate = exchangeRates[currency];
+                      const amountUAH = amount * rate;
+                      const percentage = (amountUAH / totalUAH) * 100;
+                      
+                      return (
+                        <View key={currency} style={styles.legendItem}>
+                          <View 
+                            style={[
+                              styles.legendColor, 
+                              { backgroundColor: CURRENCY_COLORS[currency] }
+                            ]} 
+                          />
+                          <Text style={styles.legendText}>
+                            {currency} {Math.round(percentage)}%
+                          </Text>
+                        </View>
+                      );
+                    }
+                    return null;
+                  })}
+                </View>
               </View>
             )}
           </View>
@@ -206,7 +236,7 @@ export default function PortfolioScreen() {
                       </View>
                       <View style={styles.detailRight}>
                         <Text style={styles.detailPercentage}>
-                          {percentage.toFixed(1)}%
+                          {percentage.toFixed(2)}%
                         </Text>
                         <Text style={styles.detailValue}>
                           {formatCurrency(amountUAH)} ₴
@@ -376,7 +406,33 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
+    width: '100%',
+  },
+  customLegend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 16,
+    gap: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  legendColor: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  legendText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2d3748',
   },
   details: {
     gap: 12,

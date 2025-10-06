@@ -11,8 +11,8 @@ export const calculateTotals = (
     savings.EUR * exchangeRates.EUR +
     savings.USDT * exchangeRates.USDT;
 
-  const totalUSD = totalUAH / exchangeRates.USD;
-  const totalEUR = totalUAH / exchangeRates.EUR;
+  const totalUSD = exchangeRates.USD > 0 ? totalUAH / exchangeRates.USD : 0;
+  const totalEUR = exchangeRates.EUR > 0 ? totalUAH / exchangeRates.EUR : 0;
 
   return { totalUAH, totalUSD, totalEUR };
 };
@@ -21,11 +21,16 @@ export const calculateAssetEquivalents = (
   totalUSD: number,
   assetPrices: AssetPrices
 ): AssetEquivalent => {
+  // Перевірка на валідність ціни: має бути більше 0 і не Infinity/NaN
+  const isValidPrice = (price: number): boolean => {
+    return price > 0 && isFinite(price);
+  };
+
   return {
-    BTC: totalUSD / assetPrices.BTC,
-    ETH: totalUSD / assetPrices.ETH,
-    XAU: totalUSD / assetPrices.XAU,
-    XAG: totalUSD / assetPrices.XAG,
+    BTC: isValidPrice(assetPrices.BTC) ? totalUSD / assetPrices.BTC : 0,
+    ETH: isValidPrice(assetPrices.ETH) ? totalUSD / assetPrices.ETH : 0,
+    XAU: isValidPrice(assetPrices.XAU) ? totalUSD / assetPrices.XAU : 0,
+    XAG: isValidPrice(assetPrices.XAG) ? totalUSD / assetPrices.XAG : 0,
   };
 };
 

@@ -18,12 +18,7 @@ export default function ChartScreen() {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
-  const reducedLabels =
-    chartDays === 14
-      ? chartData.labels.map((label: string, i: number) => (i % 2 === 0 ? label : ""))
-      : chartDays === 21 ? chartData.labels.map((label: string, i: number) => (i % 3 === 0 ? label : "")) 
-      : chartDays > 21 ? chartData.labels.map((label: string, i: number) => (i % 5 === 0 ? label : ""))
-      : chartData.labels;
+  
 
   useEffect(() => {
     Animated.parallel([
@@ -48,6 +43,16 @@ export default function ChartScreen() {
 
     generateChartData('USD', 7);
   }, []);
+
+  const reducedLabels = (() => {
+    const labels = chartData?.labels ?? [];
+    if (!labels || labels.length === 0) return [];
+
+    if (chartDays === 14) return labels.map((label: string, i: number) => (i % 2 === 0 ? label : ""));
+    if (chartDays === 21) return labels.map((label: string, i: number) => (i % 3 === 0 ? label : ""));
+    if (chartDays > 21) return labels.map((label: string, i: number) => (i % 5 === 0 ? label : ""));
+    return labels;
+  })();
 
   const generateChartData = (currency: ChartCurrency, days: number) => {
     setIsLoading(true);
@@ -226,7 +231,7 @@ export default function ChartScreen() {
               <View style={[styles.currentRateBadge, { backgroundColor: getCurrencyBgColor(chartCurrency) }]}>
                 <Text style={styles.currentRateLabel}>Зараз</Text>
                 <Text style={[styles.currentRateValue, { color: getCurrencyColor(chartCurrency) }]}>
-                  {exchangeRates[chartCurrency].toFixed(2)} ₴
+                  {(exchangeRates && typeof exchangeRates[chartCurrency] === 'number') ? exchangeRates[chartCurrency].toFixed(2) + ' ₴' : '—'}
                 </Text>
               </View>
             </View>
@@ -242,7 +247,7 @@ export default function ChartScreen() {
                       <LineChart
                         data={{
                           ...chartData,
-                          labels: reducedLabels
+                          labels: reducedLabels.length ? reducedLabels : chartData.labels
                         }}
                         width={Dimensions.get('window').width - 80}
                         height={220}

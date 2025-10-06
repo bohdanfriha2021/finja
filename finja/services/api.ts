@@ -17,7 +17,10 @@ export const api = {
       }
 
       const data = await response.json();
-      const rates: ExchangeRates = { ...DEFAULT_EXCHANGE_RATES };
+      const rates: ExchangeRates = { 
+        ...DEFAULT_EXCHANGE_RATES,
+        UAH: 1, // ✅ UAH - базова валюта, курс завжди 1
+      };
 
       for (const currency of data) {
         // USD/UAH - currency code 840 (USD) to 980 (UAH)
@@ -60,22 +63,34 @@ export const api = {
         XAG: DEFAULT_ASSET_PRICES.XAG,
       };
 
-      // Try to fetch metals prices (may fail with demo API key)
+      // Try to fetch metals prices from metals-api.com (free tier available)
+      // Register at https://metals-api.com/ to get your free API key
       try {
         const metalsResponse = await fetch(
-          'https://api.metals.dev/v1/latest?api_key=DEMO&currency=USD&unit=toz',
+          'https://api.metals.live/v1/spot',
           { method: 'GET' }
         );
 
         if (metalsResponse.ok) {
           const metalsData = await metalsResponse.json();
-          if (metalsData.metals) {
-            assets.XAU = metalsData.metals.gold || DEFAULT_ASSET_PRICES.XAU;
-            assets.XAG = metalsData.metals.silver || DEFAULT_ASSET_PRICES.XAG;
+          // metals.live API returns prices per troy ounce in USD
+          if (metalsData && metalsData.length > 0) {
+            const goldData = metalsData.find((m: any) => m.metal === 'gold');
+            const silverData = metalsData.find((m: any) => m.metal === 'silver');
+            
+            if (goldData && goldData.price) {
+              assets.XAU = goldData.price;
+            }
+            if (silverData && silverData.price) {
+              assets.XAG = silverData.price;
+            }
           }
         }
       } catch (metalsError) {
-        console.warn('Metals API failed, using defaults:', metalsError);
+        console.warn('Metals API failed, using approximate values:', metalsError);
+        // Використовуємо приблизні поточні ціни як fallback
+        assets.XAU = 2650; // Приблизна ціна золота
+        assets.XAG = 31;   // Приблизна ціна срібла
       }
 
       return assets;

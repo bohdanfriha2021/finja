@@ -32,7 +32,7 @@ export const DEFAULT_SAVINGS = {
 };
 
 export const DEFAULT_EXCHANGE_RATES = {
-  UAH: 0,
+  UAH: 1, // ✅ UAH - базова валюта, курс завжди 1
   USD: 0,
   EUR: 0,
   USDT: 0,
@@ -41,8 +41,8 @@ export const DEFAULT_EXCHANGE_RATES = {
 export const DEFAULT_ASSET_PRICES = {
   BTC: 0,
   ETH: 0,
-  XAU: 0,
-  XAG: 0,
+  XAU: 2650, // Приблизна ціна золота за унцію (troy ounce)
+  XAG: 31,   // Приблизна ціна срібла за унцію (troy ounce)
 };
 
 export const STORAGE_KEYS = {
